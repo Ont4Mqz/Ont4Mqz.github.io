@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class PlayerMove : MonoBehaviour
 {
     public float speed = 5f;
     public Camera mainCamera; // Inspectorでカメラを指定（未指定なら自動取得）
