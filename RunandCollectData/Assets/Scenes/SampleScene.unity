@@ -1435,43 +1435,43 @@ MonoBehaviour:
     timer: 0
   - prefab: {fileID: 1190087405525350192, guid: 3cf4f84681253df48965afdfea13e638, type: 3}
     spawnChance: 0.9
-    spawnInterval: 1
+    spawnInterval: 2
     timer: 0
   - prefab: {fileID: 1775582336184569533, guid: 5f7ad4b1073e0d04da031ea0754a9a00, type: 3}
     spawnChance: 0.8
-    spawnInterval: 1
+    spawnInterval: 3
     timer: 0
   - prefab: {fileID: 7642867919621275606, guid: 0de7ef16608f3f8479b82b2383eb169e, type: 3}
     spawnChance: 0.7
-    spawnInterval: 1
+    spawnInterval: 4
     timer: 0
   - prefab: {fileID: 3221479662570711058, guid: 8a824abb7a58e09488fc8e1bba19e535, type: 3}
     spawnChance: 0.6
-    spawnInterval: 1
+    spawnInterval: 5
     timer: 0
   - prefab: {fileID: 5068440776744566057, guid: 039dc6529bb1337469263421d1dd458b, type: 3}
     spawnChance: 0.5
-    spawnInterval: 1
+    spawnInterval: 6
     timer: 0
   - prefab: {fileID: 4847085779744224570, guid: a54db34960bede74d9172b07b309c96e, type: 3}
     spawnChance: 0.4
-    spawnInterval: 1
+    spawnInterval: 7
     timer: 0
   - prefab: {fileID: 4574922836588948308, guid: 1f9dc313bf2bfa84aa2fe68e7103934d, type: 3}
     spawnChance: 0.3
-    spawnInterval: 1
+    spawnInterval: 8
     timer: 0
   - prefab: {fileID: 2110694812307661142, guid: 79f9441792675c946a74ffe0ff855652, type: 3}
     spawnChance: 0.2
-    spawnInterval: 1
+    spawnInterval: 9
     timer: 0
   - prefab: {fileID: 1518560689344220992, guid: 96c3cdfb8d1d98e4b8820cf713413c19, type: 3}
     spawnChance: 0.1
-    spawnInterval: 1
+    spawnInterval: 10
     timer: 0
   - prefab: {fileID: 1845160083321614156, guid: e5d231eb6ffb62a49b2e9c465afb75bc, type: 3}
     spawnChance: 0.05
-    spawnInterval: 1
+    spawnInterval: 11
     timer: 0
 --- !u!4 &1629685548
 Transform:
