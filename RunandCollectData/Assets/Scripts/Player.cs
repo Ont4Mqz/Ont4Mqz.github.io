@@ -45,9 +45,16 @@ public class Player : MonoBehaviour
 
             if (currentHP <= 0)
             {
-                gameObject.SetActive(GameOverPanel);
-                // ‚±‚±‚ÅƒV[ƒ“‘JˆÚ‚âŽ€–Sˆ—‚ðŒÄ‚Ô
+                // ƒvƒŒƒCƒ„[‚Ì“®‚«‚ðŽ~‚ß‚é
+                rb.velocity = Vector2.zero;
+
+                // GameOverPanel ‚ð•\Ž¦
+                if (GameOverPanel != null)
+                {
+                    GameOverPanel.SetActive(true);
+                }
             }
+
         }
     }
 
