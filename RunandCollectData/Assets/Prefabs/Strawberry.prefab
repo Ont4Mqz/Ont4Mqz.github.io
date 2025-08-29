@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 945011751845501256}
   - component: {fileID: 5299886043449522726}
   - component: {fileID: 3348439621494233286}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Strawberry
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,5 +124,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0acfa7c8d0eea58448fba882ae35f193, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healAmount: 5
-  scoreValue: 150
+  healAmount: 40
+  scoreValue: 40

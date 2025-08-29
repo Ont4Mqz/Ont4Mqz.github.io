@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4513202522089213004}
   - component: {fileID: 7730760931951182897}
   - component: {fileID: 1623832065725679640}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: WaterMelon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,5 +124,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0acfa7c8d0eea58448fba882ae35f193, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healAmount: 10
-  scoreValue: 200
+  healAmount: 50
+  scoreValue: 50

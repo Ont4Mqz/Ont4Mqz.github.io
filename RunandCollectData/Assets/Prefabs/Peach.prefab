@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1896242810091364395}
   - component: {fileID: 172679860366333831}
   - component: {fileID: 1460704321968160588}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Peach
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,5 +124,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0acfa7c8d0eea58448fba882ae35f193, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healAmount: 10
-  scoreValue: 125
+  healAmount: 30
+  scoreValue: 30
