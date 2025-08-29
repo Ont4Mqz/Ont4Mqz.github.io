@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -48,11 +49,7 @@ public class Player : MonoBehaviour
                 // プレイヤーの動きを止める
                 rb.velocity = Vector2.zero;
 
-                // GameOverPanel を表示
-                if (GameOverPanel != null)
-                {
-                    GameOverPanel.SetActive(true);
-                }
+                SceneManager.LoadScene("ResultScene");
             }
 
         }
