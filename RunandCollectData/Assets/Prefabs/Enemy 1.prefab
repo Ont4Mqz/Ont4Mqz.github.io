@@ -100,7 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   damage: 15
-  scorePenalty: 100
+  scorePenalty: 50
 --- !u!61 &776284172247193473
 BoxCollider2D:
   m_ObjectHideFlags: 0
