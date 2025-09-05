@@ -21,7 +21,7 @@ public class Ball : MonoBehaviour
         {
             Debug.Log("Hit");
             // ÚG–Ê‚Ì–@ü•ûŒü‚É—Í‚ğ‰Á‚¦‚é
-            Vector3 direction = collision.contacts[0].normal * -1;
+            Vector3 direction = collision.contacts[0].normal;
             rb.AddForce(direction * hitForce, ForceMode.Impulse);
         }
     }
