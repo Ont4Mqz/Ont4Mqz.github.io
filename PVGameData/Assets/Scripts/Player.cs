@@ -25,6 +25,8 @@ public class Player : MonoBehaviour
         animator.SetBool("isWalking", moveInput != Vector2.zero);
         animator.SetFloat("MoveX", moveX);
         animator.SetFloat("MoveY", moveY);
+
+        //transform.Translate(Vector2.up * moveSpeed * Time.deltaTime);
     }
 
     void FixedUpdate()
