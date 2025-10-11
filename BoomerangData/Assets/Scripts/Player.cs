@@ -37,22 +37,22 @@ public class Player : MonoBehaviour
         animator.SetFloat("MoveY", moveY);
 
         // HPが時間で減少
-        decayTimer += Time.deltaTime;
-        if (decayTimer >= 1f)
-        {
-            currentHP -= Mathf.RoundToInt(hpDecayRate);
-            currentHP = Mathf.Clamp(currentHP, 0, maxHP);
-            decayTimer = 0f;
+        //decayTimer += Time.deltaTime;
+        //if (decayTimer >= 1f)
+        //{
+        //    currentHP -= Mathf.RoundToInt(hpDecayRate);
+        //    currentHP = Mathf.Clamp(currentHP, 0, maxHP);
+        //    decayTimer = 0f;
 
-            if (currentHP <= 0)
-            {
-                // プレイヤーの動きを止める
-                rb.velocity = Vector2.zero;
+        //    if (currentHP <= 0)
+        //    {
+        //        // プレイヤーの動きを止める
+        //        rb.velocity = Vector2.zero;
 
-                SceneManager.LoadScene("ResultScene");
-            }
+        //        SceneManager.LoadScene("ResultScene");
+        //    }
 
-        }
+        //}
     }
 
     void FixedUpdate()
