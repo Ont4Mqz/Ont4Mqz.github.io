@@ -256,12 +256,15 @@ MonoBehaviour:
   width: 10
   height: 19
   cellSize: 100
-  boardParent: {fileID: 1481777068}
+  boardParent: {fileID: 208386195}
   gemPrefab: {fileID: 746602542116766480, guid: d6c97cd1d2144f64f90148d5711cfe74, type: 3}
   gemSprites:
-  - {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 21300000, guid: 33f57250912b0534c8747403e7fba43d, type: 3}
+  - {fileID: 21300000, guid: 349a32ff45a8fbd41a24ddcf37f9882d, type: 3}
+  - {fileID: 21300000, guid: cdab85c6c24de3540bebcffe5a45c148, type: 3}
+  - {fileID: 21300000, guid: acab0aa01df7a094989142c84d8ab411, type: 3}
+  - {fileID: 21300000, guid: 75d6e84160f861a4991f695f6691b981, type: 3}
+  - {fileID: 21300000, guid: 8048a4785eb540e4fa9e56bee45848b4, type: 3}
 --- !u!4 &390069777
 Transform:
   m_ObjectHideFlags: 0
