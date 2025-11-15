@@ -1,62 +1,72 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class Gem : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
+public class Gem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    public int type;
-    public int x;
-    public int y;
+    public int x, y;
+    public int id;
+    public bool match = false;
 
     private BoardManager board;
-    private RectTransform rect;
-    private Vector2 startPos;
-    private Vector2 pointerDownPos;
+    public RectTransform Rect { get; private set; }
 
-    public void Init(int _x, int _y, int _type, BoardManager _board)
+    Vector2 startDragPos;
+
+    public void Init(BoardManager b, int px, int py, Sprite sprite)
     {
-        x = _x;
-        y = _y;
-        type = _type;
-        board = _board;
-        rect = GetComponent<RectTransform>();
+        board = b;
+        x = px;
+        y = py;
+
+        id = sprite.GetHashCode();
+        GetComponent<Image>().sprite = sprite;
+
+        Rect = GetComponent<RectTransform>();
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public void SetPos(int px, int py)
     {
-        pointerDownPos = eventData.position;
+        x = px;
+        y = py;
     }
 
-    public void OnDrag(PointerEventData eventData)
+    public void OnBeginDrag(PointerEventData eventData)
     {
-        // 見た目を引っ張る（任意）
-        rect.anchoredPosition += eventData.delta;
+        startDragPos = eventData.position;
     }
 
-    public void OnPointerUp(PointerEventData eventData)
+    public void OnDrag(PointerEventData eventData) { }
+
+    public void OnEndDrag(PointerEventData eventData)
     {
-        Vector2 diff = eventData.position - pointerDownPos;
+        Vector2 diff = eventData.position - startDragPos;
 
-        // どの方向にドラッグしたか判定
-        if (diff.magnitude < 30f)
-        {
-            // 小さいドラッグは無視して元に戻す
-            board.ResetGemPosition(this);
-            return;
-        }
-
-        int dx = 0;
-        int dy = 0;
-
+        // 移動方向を判定（縦横の大きい方）
         if (Mathf.Abs(diff.x) > Mathf.Abs(diff.y))
         {
-            dx = diff.x > 0 ? 1 : -1;
+            // 横
+            if (diff.x > 50) TrySwap(1, 0);
+            else if (diff.x < -50) TrySwap(-1, 0);
         }
         else
         {
-            dy = diff.y > 0 ? 1 : -1;
+            // 縦
+            if (diff.y > 50) TrySwap(0, 1);
+            else if (diff.y < -50) TrySwap(0, -1);
         }
+    }
 
-        board.TrySwap(this, dx, dy);
+    void TrySwap(int dx, int dy)
+    {
+        int nx = x + dx;
+        int ny = y + dy;
+
+        // 範囲チェック
+        // BoardManager の width/height を使いたいが private の場合は public に変更しても良い
+        // ここでは簡易に範囲外を無視
+        if (nx < 0 || ny < 0) return;
+
+        board.Swap(this, board.GetGem(nx, ny));
     }
 }

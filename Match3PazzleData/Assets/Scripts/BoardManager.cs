@@ -5,34 +5,31 @@ using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour
 {
-    [Header("Board Size")]
-    public int width = 8;
+    [Header("Board Settings")]
+    public int width = 6;
     public int height = 8;
+    public float cellSize = 100f;
 
-    [Header("UI Board Panel (RectTransform)")]
-    public RectTransform boardArea;
+    [Header("UI Parent")]
+    public RectTransform boardParent;
 
-    [Header("Gem UI Prefab")]
-    public Gem gemPrefab;
+    [Header("Gem Prefab")]
+    public GameObject gemPrefab;
 
-    [Header("Sprites")]
+    [Header("Gem Sprites")]
     public Sprite[] gemSprites;
 
-    private Gem[,] board;
-    private float cellSize;
+    private Gem[,] gems;
 
     void Start()
     {
-        board = new Gem[width, height];
-
-        // セルのサイズを自動調整
-        cellSize = boardArea.rect.width / width;
-
         CreateBoard();
     }
 
     void CreateBoard()
     {
+        gems = new Gem[width, height];
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -42,201 +39,208 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    // ======================
-    // 生成
-    // ======================
-
-    void SpawnGem(int x, int y)
+    public void SpawnGem(int x, int y)
     {
-        Gem g = Instantiate(gemPrefab, boardArea);
-        int type = Random.Range(0, gemSprites.Length);
+        GameObject g = Instantiate(gemPrefab, boardParent);
+        RectTransform rt = g.GetComponent<RectTransform>();
 
-        g.GetComponent<Image>().sprite = gemSprites[type];
-        g.Init(x, y, type, this);
+        float cell = cellSize;
 
-        // 位置セット
-        var rt = g.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(cellSize, cellSize);
-        rt.anchoredPosition = GetPos(x, y);
+        // 左上基準
+        Vector2 offset = new Vector2(
+            -(width * cell) / 2f + cell / 2f,
+            (height * cell) / 2f - cell / 2f
+        );
 
-        board[x, y] = g;
+        rt.anchoredPosition = new Vector2(
+            offset.x + x * cell,
+            offset.y - y * cell
+        );
+
+        Gem gem = g.GetComponent<Gem>();
+        gem.Init(this, x, y, gemSprites[Random.Range(0, gemSprites.Length)]);
+
+        gems[x, y] = gem;
     }
 
-    Vector2 GetPos(int x, int y)
+
+    // -----------------------------
+    // スワップ処理
+    // -----------------------------
+    public void Swap(Gem a, Gem b)
     {
-        return new Vector2(x * cellSize, y * cellSize);
-    }
-
-    public void ResetGemPosition(Gem g)
-    {
-        g.GetComponent<RectTransform>().anchoredPosition = GetPos(g.x, g.y);
-    }
-
-    // ======================
-    // スワップ
-    // ======================
-
-    public void TrySwap(Gem g, int dx, int dy)
-    {
-        int tx = g.x + dx;
-        int ty = g.y + dy;
-
-        if (tx < 0 || tx >= width || ty < 0 || ty >= height)
-        {
-            ResetGemPosition(g);
-            return;
-        }
-
-        Gem target = board[tx, ty];
-
-        StartCoroutine(SwapRoutine(g, target));
+        StartCoroutine(SwapRoutine(a, b));
     }
 
     IEnumerator SwapRoutine(Gem a, Gem b)
     {
-        Swap(a, b);
+        Vector2 aPos = a.Rect.anchoredPosition;
+        Vector2 bPos = b.Rect.anchoredPosition;
 
-        yield return new WaitForSeconds(0.05f);
-
-        var matches = FindMatches();
-        if (matches.Count == 0)
+        // 交換アニメ
+        float t = 0;
+        while (t < 0.15f)
         {
-            Swap(a, b); // 戻す
+            t += Time.deltaTime;
+            float p = t / 0.15f;
+
+            a.Rect.anchoredPosition = Vector2.Lerp(aPos, bPos, p);
+            b.Rect.anchoredPosition = Vector2.Lerp(bPos, aPos, p);
+
+            yield return null;
+        }
+
+        // 位置入れ替え
+        int ax = a.x;
+        int ay = a.y;
+
+        a.SetPos(b.x, b.y);
+        b.SetPos(ax, ay);
+
+        gems[a.x, a.y] = a;
+        gems[b.x, b.y] = b;
+
+        // マッチ判定
+        if (!CheckMatches())
+        {
+            // 元に戻す
+            StartCoroutine(SwapRoutine(b, a));
         }
         else
         {
-            yield return ClearAndDrop(matches);
+            yield return StartCoroutine(DestroyMatches());
+            yield return StartCoroutine(FallDown());
+            yield return StartCoroutine(FillBoard());
         }
     }
 
-    void Swap(Gem a, Gem b)
+    // -----------------------------
+    // マッチ処理
+    // -----------------------------
+    bool CheckMatches()
     {
-        // board 配列入れ替え
-        board[a.x, a.y] = b;
-        board[b.x, b.y] = a;
+        bool matched = false;
 
-        // x y 入れ替え
-        int ax = a.x; int ay = a.y;
-        a.x = b.x; a.y = b.y;
-        b.x = ax; b.y = ay;
-
-        // 位置更新
-        a.GetComponent<RectTransform>().anchoredPosition = GetPos(a.x, a.y);
-        b.GetComponent<RectTransform>().anchoredPosition = GetPos(b.x, b.y);
-    }
-
-    // ======================
-    // マッチ判定
-    // ======================
-
-    List<Gem> FindMatches()
-    {
-        List<Gem> matches = new List<Gem>();
-
-        // 横
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width - 2; x++)
-            {
-                Gem a = board[x, y];
-                Gem b = board[x + 1, y];
-                Gem c = board[x + 2, y];
-
-                if (a.type == b.type && b.type == c.type)
-                {
-                    matches.Add(a);
-                    matches.Add(b);
-                    matches.Add(c);
-                }
-            }
-        }
-
-        // 縦
         for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < height - 2; y++)
-            {
-                Gem a = board[x, y];
-                Gem b = board[x, y + 1];
-                Gem c = board[x, y + 2];
-
-                if (a.type == b.type && b.type == c.type)
-                {
-                    matches.Add(a);
-                    matches.Add(b);
-                    matches.Add(c);
-                }
-            }
-        }
-
-        return matches;
-    }
-
-    // ======================
-    // 消す → 落下 → 補充
-    // ======================
-
-    IEnumerator ClearAndDrop(List<Gem> matches)
-    {
-        // 消去
-        foreach (var g in matches)
-        {
-            board[g.x, g.y] = null;
-            Destroy(g.gameObject);
-        }
-
-        yield return new WaitForSeconds(0.05f);
-
-        // 落下
-        for (int x = 0; x < width; x++)
-        {
-            int emptyY = 0;
-
             for (int y = 0; y < height; y++)
             {
-                if (board[x, y] == null)
+                Gem gem = gems[x, y];
+                if (gem == null) continue;
+
+                // 横3
+                if (x < width - 2)
                 {
-                    emptyY = y;
-
-                    // 上から探す
-                    for (int ny = y + 1; ny < height; ny++)
+                    if (gems[x + 1, y].id == gem.id && gems[x + 2, y].id == gem.id)
                     {
-                        if (board[x, ny] != null)
+                        gem.match = true;
+                        gems[x + 1, y].match = true;
+                        gems[x + 2, y].match = true;
+                        matched = true;
+                    }
+                }
+
+                // 縦3
+                if (y < height - 2)
+                {
+                    if (gems[x, y + 1].id == gem.id && gems[x, y + 2].id == gem.id)
+                    {
+                        gem.match = true;
+                        gems[x, y + 1].match = true;
+                        gems[x, y + 2].match = true;
+                        matched = true;
+                    }
+                }
+            }
+        }
+
+        return matched;
+    }
+
+    IEnumerator DestroyMatches()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (gems[x, y] != null && gems[x, y].match)
+                {
+                    Destroy(gems[x, y].gameObject);
+                    gems[x, y] = null;
+                }
+            }
+        }
+        yield return new WaitForSeconds(0.1f);
+    }
+
+    IEnumerator FallDown()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 1; y < height; y++)
+            {
+                if (gems[x, y] == null)
+                {
+                    for (int ny = y; ny < height; ny++)
+                    {
+                        if (gems[x, ny] != null)
                         {
-                            Gem g = board[x, ny];
+                            gems[x, y] = gems[x, ny];
+                            gems[x, ny] = null;
 
-                            board[x, emptyY] = g;
-                            board[x, ny] = null;
-
-                            g.y = emptyY;
-                            g.GetComponent<RectTransform>().anchoredPosition = GetPos(x, emptyY);
-
+                            gems[x, y].SetPos(x, y);
+                            UpdateGemPosition(gems[x, y]);
                             break;
                         }
                     }
                 }
             }
         }
+        yield return new WaitForSeconds(0.1f);
+    }
 
-        // 補充
+    IEnumerator FillBoard()
+    {
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                if (board[x, y] == null)
+                if (gems[x, y] == null)
                 {
                     SpawnGem(x, y);
                 }
             }
         }
+        yield return new WaitForSeconds(0.1f);
 
-        yield return new WaitForSeconds(0.05f);
-
-        // 連鎖チェック
-        var next = FindMatches();
-        if (next.Count > 0)
+        // さらにマッチがあれば連鎖
+        if (CheckMatches())
         {
-            yield return ClearAndDrop(next);
+            yield return StartCoroutine(DestroyMatches());
+            yield return StartCoroutine(FallDown());
+            yield return StartCoroutine(FillBoard());
         }
     }
+
+    void UpdateGemPosition(Gem gem)
+    {
+        float cell = cellSize;
+        Vector2 offset = new Vector2(
+            -(width * cell) / 2f + cell / 2f,
+            (height * cell) / 2f - cell / 2f
+        );
+
+        gem.Rect.anchoredPosition = new Vector2(
+            offset.x + gem.x * cell,
+            offset.y - gem.y * cell
+        );
+    }
+
+
+    public Gem GetGem(int x, int y)
+    {
+        if (x < 0 || y < 0 || x >= width || y >= height) return null;
+        return gems[x, y];
+    }
+
 }
