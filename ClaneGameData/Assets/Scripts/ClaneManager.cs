@@ -4,30 +4,30 @@ using UnityEngine;
 public class ClaneManager : MonoBehaviour
 {
     [Header("移動設定")]
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float moveSpeed = 5f; // 移動速度
 
     [Header("移動制限")]
-    [SerializeField] private Vector2 minLimit;
-    [SerializeField] private Vector2 maxLimit;
+    [SerializeField] private Vector2 minLimit; // 最小制限
+    [SerializeField] private Vector2 maxLimit; // 最大制限
 
     [Header("リリース位置")]
-    [SerializeField] private Vector2 releasePosition;
+    [SerializeField] private Vector2 releasePosition; // リリース位置
 
     [Header("アーム設定")]
-    [SerializeField] private Transform armLeft;
-    [SerializeField] private Transform armRight;
+    [SerializeField] private Transform armLeft; // 左アーム
+    [SerializeField] private Transform armRight; // 
 
-    [SerializeField] private float openAngle = 40f;
-    [SerializeField] private float closeAngle = 5f;
-    [SerializeField] private float armRotateSpeed = 120f;
+    [SerializeField] private float openAngle = 40f; // 開く角度
+    [SerializeField] private float closeAngle = 5f; // 閉じる角度
+    [SerializeField] private float armRotateSpeed = 120f; // アーム回転速度
 
     [Header("自動制御")]
-    [SerializeField] private float autoMoveSpeed = 3f;
-    [SerializeField] private float releaseDelay = 0.3f;
+    [SerializeField] private float autoMoveSpeed = 3f; // 自動移動速度
+    [SerializeField] private float releaseDelay = 0.3f; // リリースまでの遅延時間
 
-    private bool isCatching = false;
-    private bool isAutoMoving = false;
-    private float currentAngle;
+    private bool isCatching = false; // キャッチ中フラグ
+    private bool isAutoMoving = false; // 自動移動中フラグ
+    private float currentAngle; // 現在のアーム角度
 
     void Start()
     {
@@ -37,7 +37,7 @@ public class ClaneManager : MonoBehaviour
 
     void Update()
     {
-        if (!isAutoMoving)
+        if (!isAutoMoving) // 自動移動中でなければ
         {
             Move();
             CatchInput();
@@ -46,10 +46,7 @@ public class ClaneManager : MonoBehaviour
         UpdateArms();
     }
 
-    // --------------------
-    // 手動移動
-    // --------------------
-    void Move()
+    void Move() // 手動移動
     {
         float x = Input.GetAxisRaw("Horizontal");
         float y = Input.GetAxisRaw("Vertical");
@@ -57,28 +54,22 @@ public class ClaneManager : MonoBehaviour
         Vector3 move = new Vector3(x, y, 0) * moveSpeed * Time.deltaTime;
         transform.position += move;
 
-        Vector3 pos = transform.position;
+        Vector3 pos = transform.position; // 位置制限
         pos.x = Mathf.Clamp(pos.x, minLimit.x, maxLimit.x);
         pos.y = Mathf.Clamp(pos.y, minLimit.y, maxLimit.y);
         transform.position = pos;
     }
 
-    // --------------------
-    // キャッチ入力
-    // --------------------
-    void CatchInput()
+    void CatchInput() // キャッチ入力
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
             isCatching = true;
-            StartCoroutine(AutoMoveRoutine());
+            StartCoroutine(AutoMoveRoutine()); // 自動搬送開始
         }
     }
 
-    // --------------------
-    // アーム制御
-    // --------------------
-    void UpdateArms()
+    void UpdateArms() // アームの開閉更新
     {
         float targetAngle = isCatching ? closeAngle : openAngle;
 
@@ -91,24 +82,19 @@ public class ClaneManager : MonoBehaviour
         SetArmAngle(currentAngle);
     }
 
-    void SetArmAngle(float angle)
+    void SetArmAngle(float angle) // アーム角度設定
     {
         armLeft.localRotation = Quaternion.Euler(0, 0, angle);
         armRight.localRotation = Quaternion.Euler(0, 0, -angle);
     }
 
-    // --------------------
-    // 自動搬送（Y → X → リリース）
-    // --------------------
-    IEnumerator AutoMoveRoutine()
+    IEnumerator AutoMoveRoutine() // 自動搬送コルーチン
     {
         isAutoMoving = true;
 
-        // 掴む演出待ち
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.2f); // 少し待つ
 
-        // ① Y方向に移動
-        while (Mathf.Abs(transform.position.y - releasePosition.y) > 0.05f)
+        while (Mathf.Abs(transform.position.y - releasePosition.y) > 0.05f) // Y方向に移動
         {
             float y = Mathf.MoveTowards(
                 transform.position.y,
@@ -125,8 +111,7 @@ public class ClaneManager : MonoBehaviour
             yield return null;
         }
 
-        // ② X方向に移動
-        while (Mathf.Abs(transform.position.x - releasePosition.x) > 0.05f)
+        while (Mathf.Abs(transform.position.x - releasePosition.x) > 0.05f) // X方向に移動
         {
             float x = Mathf.MoveTowards(
                 transform.position.x,
@@ -143,18 +128,14 @@ public class ClaneManager : MonoBehaviour
             yield return null;
         }
 
-        // リリース
-        yield return new WaitForSeconds(releaseDelay);
+        yield return new WaitForSeconds(releaseDelay); // リリース待機
         isCatching = false;
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.2f); // 少し待つ
         isAutoMoving = false;
     }
 
-    // --------------------
-    // ギズモ表示
-    // --------------------
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmosSelected() // ギズモ表示
     {
         Gizmos.color = Color.cyan;
 

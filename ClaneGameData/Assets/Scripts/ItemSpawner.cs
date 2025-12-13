@@ -4,58 +4,43 @@ using UnityEngine;
 
 public class ItemSpawner : MonoBehaviour
 {
-    [SerializeField] private List<GameObject> itemPrefabs;
-    [SerializeField] private List<Transform> spawnPoints;
-    [SerializeField] private float spawnInterval = 0.2f;
-    [SerializeField] private int initialSpawnCount = 5;
+    [SerializeField] private List<GameObject> itemPrefabs; // スポーンするアイテムのプレハブリスト
+    [SerializeField] private List<Transform> spawnPoints; // スポーン位置のリスト
+    [SerializeField] private float spawnInterval = 0.2f; // スポーン間隔
 
-    public int InitialSpawnCount => initialSpawnCount;
-
-    void Start()
-    {
-        SpawnRandom(initialSpawnCount);
-    }
-
-    // --------------------
-    // 指定プレハブを指定数スポーン
-    // ★ 今回エラーの原因だったやつ
-    // --------------------
-    public void Spawn(GameObject prefab, int count)
+    public void Spawn(GameObject prefab, int count) // 指定したプレハブを指定数スポーン
     {
         StartCoroutine(SpawnRoutine(prefab, count));
     }
 
-    IEnumerator SpawnRoutine(GameObject prefab, int count)
+    IEnumerator SpawnRoutine(GameObject prefab, int count) // 指定したプレハブを指定数スポーンするコルーチン
     {
         for (int i = 0; i < count; i++)
         {
             Transform point =
-                spawnPoints[Random.Range(0, spawnPoints.Count)];
+                spawnPoints[Random.Range(0, spawnPoints.Count)]; // ランダムにスポーン位置を選択
 
-            Instantiate(prefab, point.position, Quaternion.identity);
+            Instantiate(prefab, point.position, Quaternion.identity); // アイテムをスポーン
             yield return new WaitForSeconds(spawnInterval);
         }
     }
 
-    // --------------------
-    // 完全ランダムスポーン
-    // --------------------
-    public void SpawnRandom(int count)
+    public void SpawnRandom(List<GameObject> prefabs, int count) // ランダムなプレハブを指定数スポーン
     {
-        StartCoroutine(SpawnRandomRoutine(count));
+        StartCoroutine(SpawnRandomRoutine(prefabs, count));
     }
 
-    IEnumerator SpawnRandomRoutine(int count)
+    IEnumerator SpawnRandomRoutine(List<GameObject> prefabs, int count) // ランダムなプレハブを指定数スポーンするコルーチン
     {
         for (int i = 0; i < count; i++)
         {
             GameObject prefab =
-                itemPrefabs[Random.Range(0, itemPrefabs.Count)];
+                prefabs[Random.Range(0, prefabs.Count)]; // ランダムにプレハブを選択
 
             Transform point =
-                spawnPoints[Random.Range(0, spawnPoints.Count)];
+                spawnPoints[Random.Range(0, spawnPoints.Count)]; // ランダムにスポーン位置を選択
 
-            Instantiate(prefab, point.position, Quaternion.identity);
+            Instantiate(prefab, point.position, Quaternion.identity); // アイテムをスポーン
             yield return new WaitForSeconds(spawnInterval);
         }
     }

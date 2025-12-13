@@ -8,32 +8,34 @@ public class ItemManager : MonoBehaviour
 {
     public static ItemManager Instance;
 
-    [Header("達成条件用プレハブ")]
-    [SerializeField] private List<GameObject> allItems;
+    [Header("スポーン候補プレハブ")]
+    [SerializeField] private List<GameObject> spawnCandidates; // スポーン候補プレハブリスト
 
-    [Header("既存 ItemSpawner")]
-    [SerializeField] private ItemSpawner itemSpawner;
+    [Header("ItemSpawner")]
+    [SerializeField] private ItemSpawner itemSpawner; // アイテムスポーナー
+
+    [Header("最初に湧く個数")]
+    [SerializeField] private int initialSpawnCount = 6; // 最初にスポーンする個数
 
     [Header("UI（3種アイコン）")]
-    [SerializeField] private Image[] itemIcons;
+    [SerializeField] private Image[] itemIcons; // アイテムアイコンUI配列
 
     [Header("次の補充数UI")]
-    [SerializeField] private TextMeshProUGUI nextSpawnCountText;
+    [SerializeField] private TextMeshProUGUI nextSpawnCountText; // 次の補充数表示UI
 
     [Header("補充数の範囲")]
-    [SerializeField] private int minNextSpawn = 3;
-    [SerializeField] private int maxNextSpawn = 8;
+    [SerializeField] private int minNextSpawn = 3; // 最小補充数
+    [SerializeField] private int maxNextSpawn = 8; // 最大補充数
 
     [Header("ターゲット更新間隔")]
-    [SerializeField] private float updateInterval = 10f;
+    [SerializeField] private float updateInterval = 10f; // ターゲット更新間隔
 
     [Header("色設定")]
-    [SerializeField] private Color lockedColor = Color.black;
+    [SerializeField] private Color lockedColor = Color.black; // ロック中のアイコン色
 
-    private List<GameObject> targetPrefabs = new();
-    private HashSet<int> droppedIDs = new();
-
-    private int nextSpawnCount;
+    private HashSet<int> targetIDs = new(); // 目標アイテムIDセット
+    private HashSet<int> droppedIDs = new(); // ドロップ済みアイテムIDセット
+    private int nextSpawnCount; // 次の補充数
 
     void Awake()
     {
@@ -42,17 +44,13 @@ public class ItemManager : MonoBehaviour
 
     void Start()
     {
-        if (itemIcons.Length < 3)
-        {
-            Debug.LogError("ItemIcons は3個必要です");
-            return;
-        }
+        itemSpawner.SpawnRandom(spawnCandidates, initialSpawnCount); // 最初のアイテムスポーン
 
         UpdateTargets();
-        StartCoroutine(UpdateTimerRoutine());
+        StartCoroutine(UpdateTimerRoutine()); // ターゲット更新コルーチン開始
     }
 
-    IEnumerator UpdateTimerRoutine()
+    IEnumerator UpdateTimerRoutine() // ターゲット更新コルーチン
     {
         while (true)
         {
@@ -61,87 +59,78 @@ public class ItemManager : MonoBehaviour
         }
     }
 
-    // --------------------
-    // ターゲット更新
-    // --------------------
     void UpdateTargets()
     {
-        targetPrefabs.Clear();
+        targetIDs.Clear();
         droppedIDs.Clear();
 
-        nextSpawnCount = Random.Range(minNextSpawn, maxNextSpawn + 1);
-        nextSpawnCountText.text = $"Next Drops {nextSpawnCount}";
+        nextSpawnCount = Random.Range(minNextSpawn, maxNextSpawn + 1); // 次の補充数決定
+        nextSpawnCountText.text = $"次の補充数：{nextSpawnCount}"; // 次の補充数表示更新
 
-        List<GameObject> shuffled = new(allItems);
-        shuffled.Sort((a, b) => Random.Range(-1, 2));
+        List<GameObject> shuffled = new(spawnCandidates); // スポーン候補をシャッフル
+        shuffled.Sort((a, b) => Random.Range(-1, 2)); // ランダムソート
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++) // 目標3種設定
         {
-            GameObject prefab = shuffled[i];
-            targetPrefabs.Add(prefab);
+            ItemData data = shuffled[i].GetComponent<ItemData>();
+            targetIDs.Add(data.itemID);
 
             itemIcons[i].sprite =
-                prefab.GetComponent<SpriteRenderer>().sprite;
+                shuffled[i].GetComponent<SpriteRenderer>().sprite;
             itemIcons[i].color = lockedColor;
         }
     }
 
-    // --------------------
-    // 落下通知
-    // --------------------
-    public void OnItemDropped(ItemData data)
+    public void OnItemDropped(ItemData data) // アイテムドロップ時処理
     {
-        ScoreManager.Instance.AddScore(data.score);
+        ScoreManager.Instance.AddScore(data.score); // スコア加算
 
-        // ターゲットか？
-        foreach (var prefab in targetPrefabs)
-        {
-            if (prefab.GetComponent<ItemData>().itemID == data.itemID)
-            {
-                droppedIDs.Add(data.itemID);
-                UnlockIcon(data.itemID);
-                break;
-            }
-        }
+        if (!targetIDs.Contains(data.itemID))
+            return;
 
-        // ★ 3種すべて達成
-        if (droppedIDs.Count >= 3)
+        if (droppedIDs.Contains(data.itemID))
+            return;
+
+        droppedIDs.Add(data.itemID); // ドロップ済みIDに追加
+        UnlockIcon(data.itemID);
+
+        if (droppedIDs.Count == 3)
         {
-            SpawnWithGuarantee();
-            UpdateTargets();
+            StartCoroutine(SpawnAndRefresh()); // アイテム補充＆ターゲット更新コルーチン開始
         }
     }
 
-    // --------------------
-    // 必須3種を必ず含めてスポーン
-    // --------------------
-    void SpawnWithGuarantee()
+    IEnumerator SpawnAndRefresh() // アイテム補充＆ターゲット更新コルーチン
     {
-        int remaining = nextSpawnCount;
-
-        // ① 必須スポーン（各1）
-        foreach (var prefab in targetPrefabs)
+        foreach (int id in targetIDs)
         {
+            GameObject prefab = spawnCandidates.Find(
+                x => x.GetComponent<ItemData>().itemID == id // アイテムIDでプレハブ検索
+            );
             itemSpawner.Spawn(prefab, 1);
-            remaining--;
         }
 
-        // ② 残りを完全ランダム
+        int remaining = nextSpawnCount - 3;
         if (remaining > 0)
         {
-            itemSpawner.SpawnRandom(remaining);
+            itemSpawner.SpawnRandom(spawnCandidates, remaining);
         }
+
+        yield return new WaitForSeconds(0.3f); // 少し待つ
+        UpdateTargets();
     }
 
-    void UnlockIcon(int id)
+    void UnlockIcon(int id) // アイコンロック解除
     {
-        for (int i = 0; i < targetPrefabs.Count; i++)
+        int index = 0;
+        foreach (int targetID in targetIDs) // 目標IDを走査
         {
-            if (targetPrefabs[i].GetComponent<ItemData>().itemID == id)
+            if (targetID == id)
             {
-                itemIcons[i].color = Color.white;
+                itemIcons[index].color = Color.white; // ロック解除
                 return;
             }
+            index++;
         }
     }
 }
