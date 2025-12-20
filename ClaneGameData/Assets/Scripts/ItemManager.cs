@@ -65,7 +65,7 @@ public class ItemManager : MonoBehaviour
         droppedIDs.Clear();
 
         nextSpawnCount = Random.Range(minNextSpawn, maxNextSpawn + 1); // 次の補充数決定
-        nextSpawnCountText.text = $"次の補充数：{nextSpawnCount}"; // 次の補充数表示更新
+        nextSpawnCountText.text = $"{nextSpawnCount}"; // 次の補充数表示更新
 
         List<GameObject> shuffled = new(spawnCandidates); // スポーン候補をシャッフル
         shuffled.Sort((a, b) => Random.Range(-1, 2)); // ランダムソート

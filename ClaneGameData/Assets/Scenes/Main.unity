@@ -1224,7 +1224,7 @@ MonoBehaviour:
   minNextSpawn: 10
   maxNextSpawn: 50
   updateInterval: 1000
-  lockedColor: {r: 0.8207547, g: 0.8207547, b: 0.8207547, a: 1}
+  lockedColor: {r: 0.6415094, g: 0.6415094, b: 0.6415094, a: 1}
 --- !u!1 &689443054
 GameObject:
   m_ObjectHideFlags: 0
