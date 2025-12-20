@@ -8,13 +8,13 @@ public class WaniWaniManager : MonoBehaviour
     [SerializeField] private TimerManager timerManager;
 
     [Header("ワニ")]
-    [SerializeField] private List<Transform> waniList = new List<Transform>();
+    [SerializeField] private List<Transform> waniList = new();
 
     [Header("移動距離")]
     [SerializeField] private float moveDistance = 1.0f;
 
     [Header("レベル別 MoveSpeed")]
-    [SerializeField] private List<float> moveSpeedLevels = new List<float>()
+    [SerializeField] private List<float> moveSpeedLevels = new()
     {
         3.0f,
         6.0f,
@@ -24,17 +24,24 @@ public class WaniWaniManager : MonoBehaviour
     };
 
     [Header("レベル別 StayTime")]
-    [SerializeField] private List<float> stayTimeLevels = new List<float>()
+    [SerializeField] private List<float> stayTimeLevels = new()
     {
         2.0f,
         1.5f,
         1.0f,
         0.5f,
-        0.0f
+        0.2f
     };
 
-    [Header("インターバル（固定）")]
-    [SerializeField] private float interval = 5f;
+    [Header("レベル別 出現頻度（秒）")]
+    [SerializeField] private List<float> spawnIntervalLevels = new()
+    {
+        2.0f,
+        1.5f,
+        1.0f,
+        0.7f,
+        0.4f
+    };
 
     [Header("その他")]
     [SerializeField] private float fastReturnSpeed = 20f;
@@ -47,6 +54,8 @@ public class WaniWaniManager : MonoBehaviour
     private Dictionary<Transform, Coroutine> moveCoroutines = new();
     private Dictionary<Transform, Material> defaultMaterials = new();
 
+    private Coroutine spawnLoop;
+
     void Start()
     {
         foreach (Transform wani in waniList)
@@ -58,25 +67,50 @@ public class WaniWaniManager : MonoBehaviour
                 defaultMaterials[wani] = r.material;
 
             wani.tag = "Untagged";
+
             Collider col = wani.GetComponent<Collider>();
             if (col != null)
                 col.enabled = false;
         }
-
-        StartCoroutine(WaniLoop());
     }
 
-    IEnumerator WaniLoop()
+    void Update()
+    {
+        if (timerManager.IsGameStarted && spawnLoop == null)
+        {
+            spawnLoop = StartCoroutine(WaniSpawnLoop());
+        }
+    }
+
+    IEnumerator WaniSpawnLoop()
     {
         while (true)
         {
-            Transform target = waniList[Random.Range(0, waniList.Count)];
+            Transform target = GetRandomIdleWani();
 
-            Coroutine c = StartCoroutine(MoveWani(target));
-            moveCoroutines[target] = c;
+            if (target != null)
+            {
+                Coroutine c = StartCoroutine(MoveWani(target));
+                moveCoroutines[target] = c;
+            }
 
-            yield return new WaitForSeconds(interval);
+            yield return new WaitForSeconds(GetCurrentSpawnInterval());
         }
+    }
+
+    Transform GetRandomIdleWani()
+    {
+        List<Transform> idle = new();
+
+        foreach (Transform w in waniList)
+        {
+            if (!moveCoroutines.ContainsKey(w))
+                idle.Add(w);
+        }
+
+        if (idle.Count == 0) return null;
+
+        return idle[Random.Range(0, idle.Count)];
     }
 
     IEnumerator MoveWani(Transform wani)
@@ -101,28 +135,8 @@ public class WaniWaniManager : MonoBehaviour
         // 引っ込む
         DisableWani(wani);
         yield return StartCoroutine(Move(wani, frontPos, startPos, moveSpeed));
-    }
 
-    float GetCurrentMoveSpeed()
-    {
-        int index = Mathf.Clamp(
-            timerManager.SpeedLevel - 1,
-            0,
-            moveSpeedLevels.Count - 1
-        );
-
-        return moveSpeedLevels[index];
-    }
-
-    float GetCurrentStayTime()
-    {
-        int index = Mathf.Clamp(
-            timerManager.SpeedLevel - 1,
-            0,
-            stayTimeLevels.Count - 1
-        );
-
-        return stayTimeLevels[index];
+        moveCoroutines.Remove(wani);
     }
 
     IEnumerator Move(Transform wani, Vector3 from, Vector3 to, float speed)
@@ -141,7 +155,8 @@ public class WaniWaniManager : MonoBehaviour
     {
         wani.tag = "Untagged";
         Collider col = wani.GetComponent<Collider>();
-        if (col != null) col.enabled = false;
+        if (col != null)
+            col.enabled = false;
     }
 
     public void HitWani(Transform wani)
@@ -152,6 +167,7 @@ public class WaniWaniManager : MonoBehaviour
         DisableWani(wani);
 
         StartCoroutine(HitAndFastReturn(wani));
+        moveCoroutines.Remove(wani);
     }
 
     IEnumerator HitAndFastReturn(Transform wani)
@@ -168,5 +184,23 @@ public class WaniWaniManager : MonoBehaviour
         yield return StartCoroutine(
             Move(wani, wani.position, defaultPositions[wani], fastReturnSpeed)
         );
+    }
+
+    float GetCurrentMoveSpeed()
+    {
+        int i = Mathf.Clamp(timerManager.SpeedLevel - 1, 0, moveSpeedLevels.Count - 1);
+        return moveSpeedLevels[i];
+    }
+
+    float GetCurrentStayTime()
+    {
+        int i = Mathf.Clamp(timerManager.SpeedLevel - 1, 0, stayTimeLevels.Count - 1);
+        return stayTimeLevels[i];
+    }
+
+    float GetCurrentSpawnInterval()
+    {
+        int i = Mathf.Clamp(timerManager.SpeedLevel - 1, 0, spawnIntervalLevels.Count - 1);
+        return spawnIntervalLevels[i];
     }
 }

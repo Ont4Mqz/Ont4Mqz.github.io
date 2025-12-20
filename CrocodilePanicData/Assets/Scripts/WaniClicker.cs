@@ -4,6 +4,7 @@ public class WaniClicker : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
     private WaniWaniManager manager;
+    [SerializeField] private ScoreManager scoreManager;
 
     void Start()
     {
@@ -31,6 +32,8 @@ public class WaniClicker : MonoBehaviour
             if (hit.collider.CompareTag("MovingWani"))
             {
                 manager.HitWani(hit.collider.transform);
+                scoreManager.AddScore();
+
             }
         }
     }
