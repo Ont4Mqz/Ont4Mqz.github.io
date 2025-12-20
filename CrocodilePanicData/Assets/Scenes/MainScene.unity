@@ -752,7 +752,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 30
+  m_text: 50
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2179,10 +2179,13 @@ MonoBehaviour:
   gameTimeLimit: 50
   levelDuration: 10
   startCountDownTime: 3
+  finishWaitTime: 3
+  resultSceneName: ResultScene
   gameTimeText: {fileID: 334852466}
   levelTimerText: {fileID: 1815164128}
   levelText: {fileID: 621538561}
   startCountText: {fileID: 2055101709}
+  finishText: {fileID: 2055101709}
 --- !u!4 &1346445186
 Transform:
   m_ObjectHideFlags: 0
@@ -2534,17 +2537,17 @@ MonoBehaviour:
   - 12
   - 15
   stayTimeLevels:
+  - 2.2
+  - 1.7
+  - 1.2
+  - 0.7
+  - 0.2
+  spawnIntervalLevels:
   - 1.5
   - 1.2
   - 0.9
   - 0.6
-  - 0.4
-  spawnIntervalLevels:
-  - 2
-  - 1.5
-  - 1
-  - 0.7
-  - 0.4
+  - 0.3
   fastReturnSpeed: 20
   hitMaterial: {fileID: 2100000, guid: 05416d8e27f01ad4f9bcbc2af929a247, type: 2}
   hitMaterialTime: 0.1

@@ -26,21 +26,21 @@ public class WaniWaniManager : MonoBehaviour
     [Header("レベル別 StayTime")]
     [SerializeField] private List<float> stayTimeLevels = new()
     {
-        2.0f,
-        1.5f,
-        1.0f,
-        0.5f,
+        2.2f,
+        1.7f,
+        1.1f,
+        0.7f,
         0.2f
     };
 
-    [Header("レベル別 出現頻度（秒）")]
+    [Header("レベル別 出現頻度")]
     [SerializeField] private List<float> spawnIntervalLevels = new()
     {
-        2.0f,
         1.5f,
-        1.0f,
-        0.7f,
-        0.4f
+        1.2f,
+        0.9f,
+        0.6f,
+        0.3f
     };
 
     [Header("その他")]
@@ -66,17 +66,24 @@ public class WaniWaniManager : MonoBehaviour
             if (r != null)
                 defaultMaterials[wani] = r.material;
 
-            wani.tag = "Untagged";
-
-            Collider col = wani.GetComponent<Collider>();
-            if (col != null)
-                col.enabled = false;
+            DisableWani(wani);
         }
     }
 
     void Update()
     {
-        if (timerManager.IsGameStarted && spawnLoop == null)
+        // ゲーム開始待ち
+        if (!timerManager.IsGameStarted) return;
+
+        // Finishしたら完全停止
+        if (timerManager.IsGameOver)
+        {
+            StopAllWani();
+            return;
+        }
+
+        // スポーン開始
+        if (spawnLoop == null)
         {
             spawnLoop = StartCoroutine(WaniSpawnLoop());
         }
@@ -84,7 +91,7 @@ public class WaniWaniManager : MonoBehaviour
 
     IEnumerator WaniSpawnLoop()
     {
-        while (true)
+        while (!timerManager.IsGameOver)
         {
             Transform target = GetRandomIdleWani();
 
@@ -121,19 +128,20 @@ public class WaniWaniManager : MonoBehaviour
         Vector3 startPos = defaultPositions[wani];
         Vector3 frontPos = startPos + (-wani.forward * moveDistance);
 
-        // 出てくる
+        // 出現
         yield return StartCoroutine(Move(wani, startPos, frontPos, moveSpeed));
 
-        // 叩ける状態
+        if (timerManager.IsGameOver) yield break;
+
+        // ヒット可能
         wani.tag = "MovingWani";
         Collider col = wani.GetComponent<Collider>();
         if (col != null) col.enabled = true;
 
-        // ステイ
         yield return new WaitForSeconds(stayTime);
 
-        // 引っ込む
         DisableWani(wani);
+
         yield return StartCoroutine(Move(wani, frontPos, startPos, moveSpeed));
 
         moveCoroutines.Remove(wani);
@@ -144,6 +152,8 @@ public class WaniWaniManager : MonoBehaviour
         float t = 0f;
         while (t < 1f)
         {
+            if (timerManager.IsGameOver) yield break;
+
             t += Time.deltaTime * speed;
             wani.position = Vector3.Lerp(from, to, t);
             yield return null;
@@ -154,6 +164,7 @@ public class WaniWaniManager : MonoBehaviour
     void DisableWani(Transform wani)
     {
         wani.tag = "Untagged";
+
         Collider col = wani.GetComponent<Collider>();
         if (col != null)
             col.enabled = false;
@@ -161,6 +172,7 @@ public class WaniWaniManager : MonoBehaviour
 
     public void HitWani(Transform wani)
     {
+        if (timerManager.IsGameOver) return;
         if (!moveCoroutines.ContainsKey(wani)) return;
 
         StopCoroutine(moveCoroutines[wani]);
@@ -184,6 +196,24 @@ public class WaniWaniManager : MonoBehaviour
         yield return StartCoroutine(
             Move(wani, wani.position, defaultPositions[wani], fastReturnSpeed)
         );
+    }
+
+    void StopAllWani()
+    {
+        if (spawnLoop != null)
+        {
+            StopCoroutine(spawnLoop);
+            spawnLoop = null;
+        }
+
+        foreach (var pair in moveCoroutines)
+        {
+            StopCoroutine(pair.Value);
+            DisableWani(pair.Key);
+            pair.Key.position = defaultPositions[pair.Key];
+        }
+
+        moveCoroutines.Clear();
     }
 
     float GetCurrentMoveSpeed()

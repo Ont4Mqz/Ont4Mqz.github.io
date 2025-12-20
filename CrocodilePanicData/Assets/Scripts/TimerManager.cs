@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class TimerManager : MonoBehaviour
 {
@@ -13,11 +14,16 @@ public class TimerManager : MonoBehaviour
     [Header("ゲーム開始カウントダウン")]
     [SerializeField] private float startCountDownTime = 3f;
 
+    [Header("リザルト")]
+    [SerializeField] private float finishWaitTime = 2f;
+    [SerializeField] private string resultSceneName = "ResultScene";
+
     [Header("表示")]
     [SerializeField] private TMP_Text gameTimeText;
     [SerializeField] private TMP_Text levelTimerText;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text startCountText;
+    [SerializeField] private TMP_Text finishText;
 
     private float remainingGameTime;
     private float remainingLevelTime;
@@ -30,6 +36,13 @@ public class TimerManager : MonoBehaviour
     public bool IsGameStarted => isGameStarted;
     public bool IsGameOver => isGameOver;
 
+    void Start()
+    {
+        if (finishText != null)
+            finishText.text = "";
+    }
+
+    // CameraMoverから呼ぶ
     public void StartGameCountdown()
     {
         StartCoroutine(GameStartCountDown());
@@ -65,15 +78,16 @@ public class TimerManager : MonoBehaviour
     {
         if (!isGameStarted || isGameOver) return;
 
-        // ゲーム制限時間
+        // 制限時間
         remainingGameTime -= Time.deltaTime;
         if (remainingGameTime <= 0f)
         {
             remainingGameTime = 0f;
-            isGameOver = true;
+            StartCoroutine(GameFinish());
+            return;
         }
 
-        // レベルアップ
+        // レベル管理
         remainingLevelTime -= Time.deltaTime;
         if (remainingLevelTime <= 0f)
         {
@@ -84,10 +98,29 @@ public class TimerManager : MonoBehaviour
         UpdateUI();
     }
 
+    IEnumerator GameFinish()
+    {
+        isGameOver = true;
+
+        if (finishText != null)
+        {
+            finishText.text = "Finish!";
+        }
+
+        yield return new WaitForSeconds(finishWaitTime);
+
+        SceneManager.LoadScene(resultSceneName);
+    }
+
     void UpdateUI()
     {
-        gameTimeText.text = Mathf.CeilToInt(remainingGameTime).ToString();
-        levelTimerText.text = Mathf.CeilToInt(remainingLevelTime).ToString();
-        levelText.text = $"LV {speedLevel}";
+        if (gameTimeText != null)
+            gameTimeText.text = Mathf.CeilToInt(remainingGameTime).ToString();
+
+        if (levelTimerText != null)
+            levelTimerText.text = Mathf.CeilToInt(remainingLevelTime).ToString();
+
+        if (levelText != null)
+            levelText.text = $"LV {speedLevel}";
     }
 }
