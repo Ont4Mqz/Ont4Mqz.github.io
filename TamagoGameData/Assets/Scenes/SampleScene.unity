@@ -271,8 +271,8 @@ GameObject:
   - component: {fileID: 257784573}
   - component: {fileID: 257784576}
   - component: {fileID: 257784575}
-  - component: {fileID: 257784574}
-  m_Layer: 0
+  - component: {fileID: 257784577}
+  m_Layer: 6
   m_Name: Protein
   m_TagString: Protein
   m_Icon: {fileID: 0}
@@ -294,51 +294,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1286238435}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &257784574
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 257784572}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 4, y: 3.01}
-    newSize: {x: 4, y: 3.01}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 4, y: 2}
-  m_EdgeRadius: 0
 --- !u!114 &257784575
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -404,6 +359,41 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!58 &257784577
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 257784572}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 2
 --- !u!1 &262207121
 GameObject:
   m_ObjectHideFlags: 0
@@ -568,7 +558,7 @@ GameObject:
   - component: {fileID: 419298642}
   - component: {fileID: 419298643}
   - component: {fileID: 419298645}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Character
   m_TagString: Character
   m_Icon: {fileID: 0}
@@ -619,11 +609,11 @@ CapsuleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 2, y: 4.4999995}
+  m_Size: {x: 3, y: 5}
   m_Direction: 0
 --- !u!114 &419298643
 MonoBehaviour:
@@ -943,7 +933,7 @@ GameObject:
   - component: {fileID: 835794018}
   - component: {fileID: 835794017}
   - component: {fileID: 835794019}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: medicine_capsule
   m_TagString: Steroid
   m_Icon: {fileID: 0}
@@ -1074,7 +1064,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1286238435}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Items
   m_TagString: Untagged
   m_Icon: {fileID: 0}
